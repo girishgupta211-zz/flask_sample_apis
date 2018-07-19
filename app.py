@@ -40,7 +40,7 @@ articles_schema = ArticleSchema(many=True)
 
 @app.route("/")
 def main():
-    return render_template('articleList.html')
+    return render_template('article.html')
 
 # endpoint to create new article
 @app.route("/create_article", methods=["POST"])
