@@ -1,11 +1,11 @@
 import os
 
 from flask import Flask, request, jsonify, make_response, render_template
+from flask_cors import CORS
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import exc, desc
 from sqlalchemy.exc import IntegrityError
-from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
@@ -38,9 +38,11 @@ class ArticleSchema(ma.Schema):
 article_schema = ArticleSchema()
 articles_schema = ArticleSchema(many=True)
 
+
 @app.route("/")
 def main():
     return render_template('article.html')
+
 
 # endpoint to create new article
 @app.route("/create_article", methods=["POST"])

@@ -72,7 +72,6 @@ input[type=submit]:hover {
 </tbody>
 </table>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-<script type="text/javascript" src="assets/js/bootstrap.js"></script>
 <script>
 $(document).ready(function(){
         FetchArticles();
@@ -151,7 +150,7 @@ function ajaxCallPost(inputObj, restApiName, async) {
             }
         },
         error: function () {
-            alert("Oops Server is busy. So please try after sometime!!!");
+            alert("Oops something went wrong. So please try after sometime!!!");
             error = true;
         }
     });
@@ -187,9 +186,15 @@ function ajaxCallGet(restApiName, async) {
                 data = result;
                 message = result;
             }
+            else{
+                error = false;
+                data = result;
+                message = result;
+                 alert("Oops No articles found!!!");
+            }
         },
         error: function () {
-            alert("Oops Server is busy. So please try after sometime!!!");
+            alert("Oops something went wrong. So please try after sometime!!!");
             error = true;
         }
     });
@@ -215,7 +220,7 @@ function ajaxCallPut(restApiName, async) {
             }
         },
         error: function () {
-            alert("Oops Server is busy. So please try after sometime!!!");
+            alert("Oops something went wrong. So please try after sometime!!!");
             error = true;
         }
     });
