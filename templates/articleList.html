@@ -3,7 +3,60 @@
 <head>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 </head>
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+
+input[type=text], select, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-top: 6px;
+    margin-bottom: 16px;
+    resize: vertical;
+}
+
+input[type=submit] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+input[type=submit]:hover {
+    background-color: #45a049;
+}
+
+.container {
+    border-radius: 5px;
+    background-color: #f2f2f2;
+    padding: 20px;
+}
+</style>
 <body>
+
+<h3>Submit an Article</h3>
+
+<div class="container">
+    <label for="title">Title</label>
+    <input type="text" id="title" name="title" placeholder="Article Title..">
+
+    <label for="author">Author Name</label>
+    <input type="text" id="author" name="author" placeholder="Author name..">
+
+    <label for="author">Content</label>
+    <input type="text" id="content" name="content" placeholder="Article Content">
+
+    <input type="submit" value="Sbmit" id="btnSubmit" class="btn btn-primary  btn-lg"
+                            tabindex="8" />
+    <div class="row">
+                    <span id="errorBox"></span>
+    </div>
+</div>
+
 <table class="table table-striped" id="my-table">
 <tbody>
     <thead>
@@ -23,10 +76,13 @@
 <script>
 $(document).ready(function(){
         FetchArticles();
+    $("#btnSubmit").click(function () {
+        NewArticle();
+    });
 });
 
 function FetchArticles() {
-    var retval = ajaxCall("/list_articles", false);
+    var retval = ajaxCallGet("/list_articles", false);
     if (retval.Error === false) {
     }
     return false;
@@ -39,8 +95,70 @@ function upvoteArticle(article_id) {
     return false;
 }
 
+function NewArticle() {
+    var title = $("#title").val();
+    var author = $("#author").val();
+    var content = $("#content").val();
+    if (title === "") {
+        $("#title").focus();
+        $("#errorBox").text("Please enter the title");
+        return false;
+    }
 
-function ajaxCall(restApiName, async) {
+    else if ( author === "") {
+        $("#author").focus();
+        $("#errorBox").text("Please enter author");
+        return false;
+    }
+
+    else if (content === "") {
+        $("#content").focus();
+        $("#errorBox").text("Please enter the content");
+        return false;
+    }
+    $("#errorBox").text("");
+    var inputObj = { title: title, author: author, content: content };
+    var retval = ajaxCallPost(inputObj, "/create_article", false);
+
+
+    if (retval.Error === false) {
+        alert("Article Submitted successfully");
+        FetchArticles();
+    }
+    else
+        $("#errorBox").text("Already submitted");
+
+    return false;
+}
+
+function ajaxCallPost(inputObj, restApiName, async) {
+    var error;
+    var data;
+    var message;
+    var ajaxObj = $.ajax({
+        cache: false,
+        async: async,
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: "http://localhost:5000" + restApiName,
+        data: JSON.stringify(inputObj),
+        dataType: "json",
+        success: function (result) {
+            if (result !== 0) {
+                error = false;
+                data = result;
+                message = result;
+            }
+        },
+        error: function () {
+            alert("Oops Server is busy. So please try after sometime!!!");
+            error = true;
+        }
+    });
+    return { AjaxObj: ajaxObj, Error: error, Data: data, Message: message };
+}
+
+function ajaxCallGet(restApiName, async) {
     var error;
     var data;
     var message;
