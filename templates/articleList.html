@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+<body>
+<table class="table table-striped" id="my-table">
+<tbody>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Content</th>
+        <th>Votes</th>
+        <th>Up vote</th>
+
+      </tr>
+    </thead>
+</tbody>
+</table>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script type="text/javascript" src="assets/js/bootstrap.js"></script>
+<script>
+$(document).ready(function(){
+        FetchArticles();
+});
+
+function FetchArticles() {
+    var retval = ajaxCall("/list_articles", false);
+    if (retval.Error === false) {
+    }
+    return false;
+}
+
+function upvoteArticle(article_id) {
+    var retval = ajaxCallPut("/vote_article/" + article_id, false);
+    if (retval.Error === false) {
+    }
+    return false;
+}
+
+
+function ajaxCall(restApiName, async) {
+    var error;
+    var data;
+    var message;
+    var ajaxObj = $.ajax({
+        cache: false,
+        async: async,
+        type: "GET",
+        contentType: "application/json; charset=utf-8",
+        url: "http://localhost:5000" + restApiName,
+        success: function (result) {
+            if (result !== 0) {
+                $('#my-table tbody > tr').remove();
+            $.each(result, function(i,row){
+                $('#my-table > tbody:last').append('<tr>' +
+                    '<td>'+row.title+'</td>' +
+                        '<td>'+row.author+'</td>' +
+                        '<td>'+ row.content+'</td>' +
+                        '<td>'+ row.votes+'</td>' +
+                       '<td> <input type="button" class="btn btn-primary" value="vote"' +
+                    'onclick=upvoteArticle(' + row.id + '); /> ' +
+                    '</td>' +
+                    '</tr>');
+            });
+
+                error = false;
+                data = result;
+                message = result;
+            }
+        },
+        error: function () {
+            alert("Oops Server is busy. So please try after sometime!!!");
+            error = true;
+        }
+    });
+    return { AjaxObj: ajaxObj, Error: error, Data: data, Message: message };
+}
+
+function ajaxCallPut(restApiName, async) {
+    var error;
+    var data;
+    var message;
+    var ajaxObj = $.ajax({
+        cache: false,
+        async: async,
+        type: "PUT",
+        contentType: "application/json; charset=utf-8",
+        url: "http://localhost:5000" + restApiName,
+        success: function (result) {
+            if (result) {
+                FetchArticles()
+                error = false;
+                data = result;
+                message = result;
+            }
+        },
+        error: function () {
+            alert("Oops Server is busy. So please try after sometime!!!");
+            error = true;
+        }
+    });
+    return { AjaxObj: ajaxObj, Error: error, Data: data, Message: message };
+}
+
+
+</script>
+
+</body>
+</html>
