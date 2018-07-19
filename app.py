@@ -1,6 +1,7 @@
 import os
+from functools import wraps
 
-from flask import Flask, request, jsonify, make_response, render_template
+from flask import Flask, request, jsonify, make_response, render_template, abort
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
@@ -44,13 +45,30 @@ def main():
     return render_template('article.html')
 
 
+def validate_json(*expected_args):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            json_object = request.get_json()
+            for expected_arg in expected_args:
+                if expected_arg not in json_object:
+                    abort(400)
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
 # endpoint to create new article
 @app.route("/create_article", methods=["POST"])
+@validate_json('title', 'author', 'content')
 def add_article():
     try:
-        title = request.json['title']
-        author = request.json['author']
-        content = request.json['content']
+        json_object = request.get_json()
+        title = json_object['title']
+        author = json_object['author']
+        content = json_object['content']
         new_article = Article(title, author, content)
         db.session.add(new_article)
         db.session.commit()
@@ -68,7 +86,7 @@ def add_article():
 def get_article():
     all_articles = Article.query.order_by(desc(Article.votes)).all()
     result = articles_schema.dump(all_articles)
-    return jsonify(result.data)
+    return jsonify(result)
 
 
 # endpoint to update article
